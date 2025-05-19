@@ -1,0 +1,397 @@
+{
+  "bot_type": "virtualagent",
+  "configuration": {
+    "ai_engine": "PRO",
+    "default_language": "en-US",
+    "kb_ids": [],
+    "llm_agent_description": "You are a helpful appointment booking assistant, capable of scheduling meetings and managing event details in the calendar. You are also capable of identifying the customer and waving their info to the conversation, but if not or challenged on the info you got, you can go with the information provided.\n\n### INSTRUCTIONS:\n0. 🧾 Identity and Authentication\n👤 Look Up Customer (Start of Conversation)\nAt the beginning of the conversation, trigger the Look_Up_Customer fulfillment action to retrieve background information such as:\n\nPast interactions\n\nLinked profiles\n\nPrevious appointment details\n\n🔐 Authenticate When Needed (Phone-Only Change)\nIf the user requests to change the phone number used for appointments (e.g., to make a booking under a new number):\n\nPolitely explain that the new number needs verification.\n\n“Sure! Since it’s a new number, I’ll need to quickly verify it.”\n\nTrigger Start_Authentication to begin verification (e.g., send code to phone).\n\nAfter the user confirms completion (“Done” / “I entered it”), silently run Verify_Authentication.\n\nProceed only if verification is successful.\nIf verification fails, inform the user and offer to retry.\n\n➡️ Never proceed with sensitive actions (Book_Appointment, Delete_Appointment, etc.) unless Verify_Authentication returns a positive result.\n\n1. Role and Tone\nYou are a helpful appointment booking assistant.\nYou guide users in scheduling and managing their appointments, while also verifying identity when required for security.\n\nTone: Friendly, professional, efficient.\nAcknowledge casual small talk (e.g., “Hi!”), but gently redirect to the task at hand.\n\n2. Context\nPurpose\nYou help users manage appointments—this includes booking, rescheduling, canceling, and checking appointments.\n\nEnvironment\nUsers may interact via voice or text. Expect occasional noise, typos, or unclear speech. Always ask politely if something is unclear.\n\n⚠️ Do not expose or mention the internal calendar address tayadi.customerengagement@gmail.com. If needed, refer only to the user’s contact info included in the appointment event.\n\n3. Task Execution\nSupport the following workflows:\n\n📅 Book a new appointment\n\n🔍 View existing appointments\n\n✏️ Modify or reschedule appointments\n\n❌ Cancel a booking\n\nEach workflow is fulfilled through a dedicated action (Book_Appointment, Check_Appointment, etc.).\n\nSensitive actions (booking, deleting) require phone verification to proceed.\n\n4. Response Guidelines\nFormat\n\nUse bullet points for slot options or lists\n\nUse numbered steps when guiding users\n\nStyle\n\nClear, concise, and helpful.\n\n✅ “Great, it’s booked!”\n✅ “Here are the available times this week.”\n✅ “Let’s verify your number quickly before we continue.”\n\n5. Error Handling and Fallbacks\nIf unclear input:\n\n“Could you confirm the time again?”\n\n“Sorry, I didn’t catch that—can you repeat it?”\n\nIf something fails:\n\n“Something went wrong. Can you try again?”\n\n“I couldn’t complete the request. Please try again later or reach out to support.”\n\n6. Guardrails\nFriendly greetings and light small talk are okay.\n\n➡️ Quickly return focus to appointment-related goals.\n\n❌ Do not engage in unrelated conversation or offer personal opinions.",
+    "llm_model": "1.0.0",
+    "logo": "https://www.shutterstock.com/image-photo/book-your-appointment-text-on-600nw-2400843205.jpg",
+    "voice_settings": {
+      "voices": []
+    },
+    "welcome_message": "Hello! I'm here to help you book and track you calendar appointments"
+  },
+  "tools": [
+    {
+      "capability": "slot_filling",
+      "description": "Escalate the conversation to a human agent if the user asks for it.",
+      "enabled": true,
+      "fulfillment": {},
+      "id": "71ad145504286e49247af447929a4e71",
+      "name": "Agent handover",
+      "slots": [],
+      "slots_view": "table",
+      "system_tool": true
+    },
+    {
+      "bot_id": 31452,
+      "capability": "slot_filling_with_fulfillment",
+      "description": "Schedules an appointment based on the user’s preferred date and time. Other details will be handled externally. Use phone number to book in case known, otherwise ask it from customer.",
+      "enabled": true,
+      "fulfillment": {
+        "authentication": {
+          "service_key": "",
+          "type": "ci_bearer_token"
+        },
+        "code": "",
+        "flow_id": 60035,
+        "flow_name": "AI Agent book appointment",
+        "output_entities": {
+          "parameters": {
+            "properties": {},
+            "required": [],
+            "type": "object"
+          }
+        },
+        "output_entities_format": "table",
+        "output_entities_text": "",
+        "output_entities_view": "table",
+        "service_id": "40010",
+        "service_name": "AI Services",
+        "type": "flow",
+        "webhook_url": "https://hooks.us.webexconnect.io/flows/60035/trigger/aiagent"
+      },
+      "id": "9ae17827987ae277febeffa29429464e",
+      "input_entities": {
+        "parameters": {
+          "properties": {
+            "phone": {
+              "description": "A valid phone number with country code",
+              "examples": [],
+              "pattern": "\\+?\\d{0,3}\\s?\\(?\\d{1,4}\\)?[-\\s]?\\d{1,4}[-\\s]?\\d{1,4}[-\\s]?\\d{1,4}",
+              "type": "phone"
+            },
+            "preferred_date": {
+              "description": "Appointment date",
+              "examples": [],
+              "format": "YYYY-mm-dd",
+              "type": "date"
+            },
+            "preferred_time": {
+              "description": "User's preferred time in the given format",
+              "examples": [],
+              "format": "hh:mm",
+              "type": "time"
+            }
+          },
+          "required": [
+            "phone",
+            "preferred_date",
+            "preferred_time"
+          ],
+          "type": "object"
+        }
+      },
+      "name": "Book_appoinment",
+      "slots_view": "table",
+      "system_tool": false
+    },
+    {
+      "bot_id": 34231,
+      "capability": "slot_filling_with_fulfillment",
+      "description": "Check and confirm date and time of appointment based on the phone used to schedule",
+      "enabled": true,
+      "fulfillment": {
+        "authentication": {
+          "service_key": "",
+          "type": "ci_bearer_token"
+        },
+        "code": "",
+        "flow_id": 60058,
+        "flow_name": "AI Agent check appointment",
+        "output_entities": {
+          "parameters": {
+            "properties": {},
+            "required": [],
+            "type": "object"
+          }
+        },
+        "output_entities_format": "table",
+        "output_entities_text": "",
+        "output_entities_view": "table",
+        "service_id": "40010",
+        "service_name": "AI Services",
+        "type": "flow",
+        "webhook_url": "https://hooks.us.webexconnect.io/flows/60058/trigger/aiagent"
+      },
+      "id": "6eeb0aa9cad1786536ff483b3d81a1a5",
+      "input_entities": {
+        "parameters": {
+          "properties": {
+            "first_name": {
+              "description": "The user's first name, used optionally to help identify the appointment even if slightly misspelled.",
+              "examples": [
+                "John",
+                "Jhon",
+                "Sara"
+              ],
+              "type": "string"
+            },
+            "last_name": {
+              "description": "The user's last name, used optionally to help identify the appointment even if slightly misspelled.",
+              "examples": [
+                "Smith",
+                "Smithe",
+                "Garcia"
+              ],
+              "type": "string"
+            },
+            "phone_number": {
+              "description": "The phone number used to book the appointment. This is required to identify the user's appointment.",
+              "examples": [
+                "305-555-1234",
+                "(212) 456-7890",
+                "1234567890"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "phone_number"
+          ],
+          "type": "object"
+        }
+      },
+      "name": "Check_Appointment",
+      "slots_view": "editor",
+      "system_tool": false
+    },
+    {
+      "bot_id": 34231,
+      "capability": "slot_filling_with_fulfillment",
+      "description": "The purpose of this action is to propose a few available appointment time slots to the user when they either don’t know their preferred time or their requested time is unavailable. The assistant will collect the relevant week or availability window, retrieve proposed slots, and propose 3 slots, with week (ex next week) day (ex Monday) and starting hour (at 9 am)",
+      "enabled": true,
+      "fulfillment": {
+        "authentication": {
+          "service_key": "",
+          "type": "ci_bearer_token"
+        },
+        "code": "",
+        "flow_id": 60068,
+        "flow_name": "AI Agent check available slots",
+        "output_entities": {
+          "parameters": {
+            "properties": {},
+            "required": [],
+            "type": "object"
+          }
+        },
+        "output_entities_format": "table",
+        "output_entities_text": "",
+        "output_entities_view": "table",
+        "service_id": "40010",
+        "service_name": "AI Services",
+        "type": "flow",
+        "webhook_url": "https://hooks.us.webexconnect.io/flows/60068/trigger/aiagent"
+      },
+      "id": "033678e43e66ef75e039e41374e9669e",
+      "input_entities": {
+        "parameters": {
+          "properties": {
+            "Week": {
+              "description": "This week",
+              "examples": [],
+              "type": "string"
+            }
+          },
+          "required": [
+            "Week"
+          ],
+          "type": "object"
+        }
+      },
+      "name": "Propose_appoinment",
+      "slots_view": "table",
+      "system_tool": false
+    },
+    {
+      "bot_id": 34231,
+      "capability": "slot_filling_with_fulfillment",
+      "description": "This is the initial action that will give you information about the customer based on their phone number or ID. Use it to show the customer that we now who he is, but in case they say they are a different person, stop using it.",
+      "enabled": true,
+      "fulfillment": {
+        "authentication": {
+          "service_key": "",
+          "type": "ci_bearer_token"
+        },
+        "code": "",
+        "flow_id": 60091,
+        "flow_name": "AI Agent consume information about customer",
+        "output_entities": {
+          "parameters": {
+            "properties": {},
+            "required": [],
+            "type": "object"
+          }
+        },
+        "output_entities_format": "table",
+        "output_entities_text": "",
+        "output_entities_view": "table",
+        "service_id": "40010",
+        "service_name": "AI Services",
+        "type": "flow",
+        "webhook_url": "https://hooks.us.webexconnect.io/flows/60091/trigger/aiagent"
+      },
+      "id": "3e48e9ef3fcfed2eca5b05dd342093e2",
+      "input_entities": {
+        "parameters": {
+          "properties": {},
+          "required": [],
+          "type": "object"
+        }
+      },
+      "name": "Look_Up_Customer",
+      "slots_view": "table",
+      "system_tool": false
+    },
+    {
+      "bot_id": 34231,
+      "capability": "slot_filling_with_fulfillment",
+      "description": "Cancel appointment using phone number if you already have it. If not please request the phone number used to book the appointment. Confirm that booking has been cancelled if EventDeleteStatus has 204 code.",
+      "enabled": true,
+      "fulfillment": {
+        "authentication": {
+          "service_key": "",
+          "type": "ci_bearer_token"
+        },
+        "code": "",
+        "flow_id": 60151,
+        "flow_name": "AI Agent cancel appointment",
+        "output_entities": {
+          "parameters": {
+            "properties": {},
+            "required": [],
+            "type": "object"
+          }
+        },
+        "output_entities_format": "table",
+        "output_entities_text": "",
+        "output_entities_view": "table",
+        "service_id": "40010",
+        "service_name": "AI Services",
+        "type": "flow",
+        "webhook_url": "https://hooks.us.webexconnect.io/flows/60151/trigger/aiagent"
+      },
+      "id": "11bde8b08e0a7b620bbba1289774a5e7",
+      "input_entities": {
+        "parameters": {
+          "properties": {
+            "Phone": {
+              "description": "A valid phone number with country code",
+              "examples": [],
+              "pattern": "\\+?\\d{0,3}\\s?\\(?\\d{1,4}\\)?[-\\s]?\\d{1,4}[-\\s]?\\d{1,4}[-\\s]?\\d{1,4}",
+              "type": "phone"
+            }
+          },
+          "required": [
+            "Phone"
+          ],
+          "type": "object"
+        }
+      },
+      "name": "Cancel_Appointment",
+      "slots_view": "table",
+      "system_tool": false
+    },
+    {
+      "bot_id": 34231,
+      "capability": "slot_filling_with_fulfillment",
+      "description": "Use this action to start the OTP process to authenticate the latest phone number provided that the customer is using. If you don't know their number yet, you can ask again",
+      "enabled": true,
+      "fulfillment": {
+        "authentication": {
+          "service_key": "",
+          "type": "ci_bearer_token"
+        },
+        "code": "",
+        "flow_id": 60179,
+        "flow_name": "AI Agent Authenticate Customer",
+        "output_entities": {
+          "parameters": {
+            "properties": {},
+            "required": [],
+            "type": "object"
+          }
+        },
+        "output_entities_format": "table",
+        "output_entities_text": "",
+        "output_entities_view": "table",
+        "service_id": "40010",
+        "service_name": "AI Services",
+        "type": "flow",
+        "webhook_url": "https://hooks.us.webexconnect.io/flows/60179/trigger/aiagent"
+      },
+      "id": "43f22489d564e26121c027f4cf9712f8",
+      "input_entities": {
+        "parameters": {
+          "properties": {
+            "phone": {
+              "description": "A valid phone number with country code",
+              "examples": [],
+              "pattern": "\\+?\\d{0,3}\\s?\\(?\\d{1,4}\\)?[-\\s]?\\d{1,4}[-\\s]?\\d{1,4}[-\\s]?\\d{1,4}",
+              "type": "phone"
+            }
+          },
+          "required": [
+            "phone"
+          ],
+          "type": "object"
+        }
+      },
+      "name": "Start_Authentication",
+      "slots_view": "table",
+      "system_tool": false
+    },
+    {
+      "bot_id": 34231,
+      "capability": "slot_filling_with_fulfillment",
+      "description": "Use this action to see if the customer's latest phone was authenticated on their journey recently. On the Journey, there needs to be an authentication on the last 2 minutes. If not, explain that it was never authenticated, or it was authenticated a long time ago. Start the action Start_Authentication, if already done 3 times with no success you can just apologise and move on.",
+      "enabled": true,
+      "fulfillment": {
+        "authentication": {
+          "service_key": "",
+          "type": "ci_bearer_token"
+        },
+        "code": "",
+        "flow_id": 60183,
+        "flow_name": "AI Agent check authentication",
+        "output_entities": {
+          "parameters": {
+            "properties": {},
+            "required": [],
+            "type": "object"
+          }
+        },
+        "output_entities_format": "table",
+        "output_entities_text": "",
+        "output_entities_view": "table",
+        "service_id": "40010",
+        "service_name": "AI Services",
+        "type": "flow",
+        "webhook_url": "https://hooks.us.webexconnect.io/flows/60183/trigger/aiagent"
+      },
+      "id": "a16550e863baaf3846eab4ae7c2908cf",
+      "input_entities": {
+        "parameters": {
+          "properties": {
+            "phone": {
+              "description": "A valid phone number with country code",
+              "examples": [],
+              "pattern": "\\+?\\d{0,3}\\s?\\(?\\d{1,4}\\)?[-\\s]?\\d{1,4}[-\\s]?\\d{1,4}[-\\s]?\\d{1,4}",
+              "type": "phone"
+            }
+          },
+          "required": [
+            "phone"
+          ],
+          "type": "object"
+        }
+      },
+      "name": "Verify_Authentication",
+      "slots_view": "table",
+      "system_tool": false
+    }
+  ],
+  "transaction_id": "66bdacbfde0f4b10bb1333d0c7d395d0"
+}
