@@ -1,0 +1,614 @@
+{
+	"info": {
+		"_postman_id": "2aa95ae3-29fc-4f6d-8dca-08d3a69db6f1",
+		"name": "Google Calendar Integration export",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "23689918"
+	},
+	"item": [
+		{
+			"name": "Create Entry",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const now = new Date();",
+							"const startTime = new Date(now.getTime() + 60 * 60 * 1000); // +1 hour",
+							"const endTime = new Date(now.getTime() + 2 * 60 * 60 * 1000); // +2 hours",
+							"",
+							"// Format to ISO string and trim milliseconds + 'Z'",
+							"const formatDateTime = (date) => date.toISOString().slice(0, -5);",
+							"",
+							"pm.environment.set(\"now_plus_1h\", formatDateTime(startTime));",
+							"pm.environment.set(\"now_plus_2h\", formatDateTime(endTime));",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"summary\": \"Doctor Appointment\",\n  \"location\": \"Downtown Clinic\",\n  \"description\": \"Annual health check-up.\",\n  \"start\": {\n    \"dateTime\": \"{{now_plus_1h}}\",\n    \"timeZone\": \"America/New_York\"\n  },\n  \"end\": {\n    \"dateTime\": \"{{now_plus_2h}}\",\n    \"timeZone\": \"America/New_York\"\n  },\n  \"attendees\": [\n    {\n      \"email\": \"patient@example.com\"\n    }\n  ],\n  \"reminders\": {\n    \"useDefault\": false,\n    \"overrides\": [\n      {\n        \"method\": \"email\",\n        \"minutes\": 60\n      },\n      {\n        \"method\": \"popup\",\n        \"minutes\": 10\n      }\n    ]\n  }\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+					"protocol": "https",
+					"host": [
+						"www",
+						"googleapis",
+						"com"
+					],
+					"path": [
+						"calendar",
+						"v3",
+						"calendars",
+						"primary",
+						"events"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Entry with phone",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const now = new Date();",
+							"const startTime = new Date(now.getTime() + 60 * 60 * 1000); // +1 hour",
+							"const endTime = new Date(now.getTime() + 2 * 60 * 60 * 1000); // +2 hours",
+							"",
+							"// Format to ISO string and trim milliseconds + 'Z'",
+							"const formatDateTime = (date) => date.toISOString().slice(0, -5);",
+							"",
+							"pm.environment.set(\"now_plus_1h\", formatDateTime(startTime));",
+							"pm.environment.set(\"now_plus_2h\", formatDateTime(endTime));",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"summary\": \"Doctor Appointment {{$guid}}\",\n  \"location\": \"Downtown Clinic\",\n  \"description\": \"Annual health check-up. Phone: 3057605714\",\n  \"start\": {\n    \"dateTime\": \"{{now_plus_1h}}\",\n    \"timeZone\": \"America/New_York\"\n  },\n  \"end\": {\n    \"dateTime\": \"{{now_plus_2h}}\",\n    \"timeZone\": \"America/New_York\"\n  },\n  \"attendees\": [\n    {\n      \"email\": \"patient@example.com\"\n    }\n  ],\n  \"reminders\": {\n    \"useDefault\": false,\n    \"overrides\": [\n      {\n        \"method\": \"email\",\n        \"minutes\": 60\n      },\n      {\n        \"method\": \"popup\",\n        \"minutes\": 10\n      }\n    ]\n  }\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+					"protocol": "https",
+					"host": [
+						"www",
+						"googleapis",
+						"com"
+					],
+					"path": [
+						"calendar",
+						"v3",
+						"calendars",
+						"primary",
+						"events"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get customer appointment by number",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://www.googleapis.com/calendar/v3/users/me/calendarList",
+					"protocol": "https",
+					"host": [
+						"www",
+						"googleapis",
+						"com"
+					],
+					"path": [
+						"calendar",
+						"v3",
+						"users",
+						"me",
+						"calendarList"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get calendar slots for this week",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const now = new Date();",
+							"",
+							"// Start = today at 00:00 UTC",
+							"const start = new Date(now);",
+							"start.setUTCHours(0, 0, 0, 0);",
+							"",
+							"// End = Sunday 23:59 UTC",
+							"const end = new Date(start);",
+							"end.setUTCDate(start.getUTCDate() + (7 - start.getUTCDay())); // Next Sunday",
+							"end.setUTCHours(23, 59, 59, 999);",
+							"",
+							"// Set env vars",
+							"pm.environment.set(\"timeMin\", start.toISOString());",
+							"pm.environment.set(\"timeMax\", end.toISOString());",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"timeMin\": \"{{timeMin}}\",\n  \"timeMax\": \"{{timeMax}}\",\n  \"timeZone\": \"America/New_York\",\n  \"items\": [\n    {\n      \"id\": \"primary\"\n    }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://www.googleapis.com/calendar/v3/freeBusy",
+					"protocol": "https",
+					"host": [
+						"www",
+						"googleapis",
+						"com"
+					],
+					"path": [
+						"calendar",
+						"v3",
+						"freeBusy"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all calendar slots",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const now = new Date();",
+							"",
+							"// Start = today at 00:00 UTC",
+							"const start = new Date(now);",
+							"start.setUTCHours(0, 0, 0, 0);",
+							"",
+							"// End = Sunday 23:59 UTC",
+							"const end = new Date(start);",
+							"end.setUTCDate(start.getUTCDate() + (7 - start.getUTCDay())); // Next Sunday",
+							"end.setUTCHours(23, 59, 59, 999);",
+							"",
+							"// Set env vars",
+							"pm.environment.set(\"timeMin\", start.toISOString());",
+							"pm.environment.set(\"timeMax\", end.toISOString());",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"timeMin\": \"{{timeMin}}\",\n  \"timeMax\": \"{{timeMax}}\",\n  \"timeZone\": \"America/New_York\",\n  \"items\": [\n    {\n      \"id\": \"primary\"\n    }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://www.googleapis.com/calendar/v3/freeBusy",
+					"protocol": "https",
+					"host": [
+						"www",
+						"googleapis",
+						"com"
+					],
+					"path": [
+						"calendar",
+						"v3",
+						"freeBusy"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get calendar list",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://www.googleapis.com/calendar/v3/users/me/calendarList",
+					"protocol": "https",
+					"host": [
+						"www",
+						"googleapis",
+						"com"
+					],
+					"path": [
+						"calendar",
+						"v3",
+						"users",
+						"me",
+						"calendarList"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get calendar next 10 events",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=2025-05-13T00:00:00Z&maxResults=10&singleEvents=true&orderBy=startTime",
+					"protocol": "https",
+					"host": [
+						"www",
+						"googleapis",
+						"com"
+					],
+					"path": [
+						"calendar",
+						"v3",
+						"calendars",
+						"primary",
+						"events"
+					],
+					"query": [
+						{
+							"key": "timeMin",
+							"value": "2025-05-13T00:00:00Z"
+						},
+						{
+							"key": "maxResults",
+							"value": "10"
+						},
+						{
+							"key": "singleEvents",
+							"value": "true"
+						},
+						{
+							"key": "orderBy",
+							"value": "startTime"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get calendar next 10 events Copy",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=2025-05-13T00:00:00Z&maxResults=10&singleEvents=true&orderBy=startTime",
+					"protocol": "https",
+					"host": [
+						"www",
+						"googleapis",
+						"com"
+					],
+					"path": [
+						"calendar",
+						"v3",
+						"calendars",
+						"primary",
+						"events"
+					],
+					"query": [
+						{
+							"key": "timeMin",
+							"value": "2025-05-13T00:00:00Z"
+						},
+						{
+							"key": "maxResults",
+							"value": "10"
+						},
+						{
+							"key": "singleEvents",
+							"value": "true"
+						},
+						{
+							"key": "orderBy",
+							"value": "startTime"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get calendar event to delete by phone",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://www.googleapis.com/calendar/v3/calendars/primary/events?q=+13057605714&singleEvents=true&orderBy=startTime",
+					"protocol": "https",
+					"host": [
+						"www",
+						"googleapis",
+						"com"
+					],
+					"path": [
+						"calendar",
+						"v3",
+						"calendars",
+						"primary",
+						"events"
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": "+13057605714"
+						},
+						{
+							"key": "singleEvents",
+							"value": "true"
+						},
+						{
+							"key": "orderBy",
+							"value": "startTime"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete an event with ID",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://www.googleapis.com/calendar/v3/calendars/primary/events/67nd1m88172fabl4hav490e360",
+					"protocol": "https",
+					"host": [
+						"www",
+						"googleapis",
+						"com"
+					],
+					"path": [
+						"calendar",
+						"v3",
+						"calendars",
+						"primary",
+						"events",
+						"67nd1m88172fabl4hav490e360"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Token with refresh token",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "client_id",
+							"value": "",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "",
+							"type": "text"
+						},
+						{
+							"key": "refresh_token",
+							"value": "",
+							"type": "text"
+						},
+						{
+							"key": "grant_type",
+							"value": "",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://oauth2.googleapis.com/token",
+					"protocol": "https",
+					"host": [
+						"oauth2",
+						"googleapis",
+						"com"
+					],
+					"path": [
+						"token"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "authUrl",
+				"value": "https://oauth.pstmn.io/v1/callback",
+				"type": "string"
+			},
+			{
+				"key": "accessTokenUrl",
+				"value": "https://oauth2.googleapis.com/token",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			},
+			{
+				"key": "scope",
+				"value": "https://www.googleapis.com/auth/calendar",
+				"type": "string"
+			},
+			{
+				"key": "clientSecret",
+				"value": "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",
+				"type": "string"
+			},
+			{
+				"key": "clientId",
+				"value": "345397446812-c2bdkgt7gg1klss3lglsncbj98apdghb.apps.googleusercontent.com",
+				"type": "string"
+			},
+			{
+				"key": "grant_type",
+				"value": "authorization_code",
+				"type": "string"
+			},
+			{
+				"key": "redirect_uri",
+				"value": "https://oauth2.googleapis.com/token",
+				"type": "string"
+			},
+			{
+				"key": "tokenName",
+				"value": "Google Calendar OAuth",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "GoogleEventToDelete",
+			"value": "67nd1m88172fabl4hav490e360",
+			"type": "default"
+		}
+	]
+}
